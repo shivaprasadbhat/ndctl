@@ -251,7 +251,7 @@ int test_pmem_namespaces(int log_level, struct ndctl_test *test,
 
 int __attribute__((weak)) main(int argc, char *argv[])
 {
-	struct ndctl_test *test = ndctl_test_new(0);
+	struct ndctl_test *test = ndctl_test_new(0, argv[0]);
 	struct ndctl_ctx *ctx;
 	int rc;
 

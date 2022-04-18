@@ -118,7 +118,7 @@ static int test_ack_shutdown_count_set(int loglevel, struct ndctl_test *test,
 int main(int argc, char *argv[])
 {
 	char *test_env = getenv("NDCTL_TEST_FAMILY");
-	struct ndctl_test *test = ndctl_test_new(0);
+	struct ndctl_test *test = ndctl_test_new(0, argv[0]);
 	struct ndctl_ctx *ctx;
 	int rc;
 

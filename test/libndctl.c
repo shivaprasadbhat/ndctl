@@ -2618,7 +2618,7 @@ int test_libndctl(int loglevel, struct ndctl_test *test, struct ndctl_ctx *ctx)
 
 int __attribute__((weak)) main(int argc, char *argv[])
 {
-	struct ndctl_test *test = ndctl_test_new(0);
+	struct ndctl_test *test = ndctl_test_new(0, argv[0]);
 	struct ndctl_ctx *ctx;
 	int rc;
 

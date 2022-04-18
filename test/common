@@ -35,6 +35,16 @@ if [ ! -v NDCTL_TEST_FAMILY ]; then
 	export NDCTL_TEST_FAMILY=INTEL
 fi
 
+if [ -f "$(dirname $0)/skip_${NDCTL_TEST_FAMILY}.js" ]; then
+	length=$(cat $(dirname $0)/skip_${NDCTL_TEST_FAMILY}.js |\
+		sed 's|//.*||' | jq length)
+	for (( i=0; i<length; i++ )); do
+		test=$(cat $(dirname $0)/skip_${NDCTL_TEST_FAMILY}.js |\
+			sed 's|//.*||' | jq -e -r ".[${i}]")
+		[ "$test" == "${0##*/}" ] && exit 77;
+	done
+fi
+
 # NFIT_TEST_BUS[01]
 #
 NFIT_TEST_BUS0="nfit_test.0"

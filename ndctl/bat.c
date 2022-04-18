@@ -32,9 +32,9 @@ int cmd_bat(int argc, const char **argv, struct ndctl_ctx *ctx)
 		usage_with_options(u, options);
 
 	if (force)
-		test = ndctl_test_new(UINT_MAX);
+		test = ndctl_test_new(UINT_MAX, argv[0]);
 	else
-		test = ndctl_test_new(0);
+		test = ndctl_test_new(0, argv[0]);
 
 	if (!test) {
 		fprintf(stderr, "failed to initialize test\n");

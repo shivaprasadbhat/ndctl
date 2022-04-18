@@ -9,6 +9,7 @@ libndctl_deps = [
   daxctl_dep,
   uuid,
   kmod,
+  json,
 ]
 
 ndctl_deps = libndctl_deps + [

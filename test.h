@@ -6,7 +6,7 @@
 
 struct ndctl_test;
 struct ndctl_ctx;
-struct ndctl_test *ndctl_test_new(unsigned int kver);
+struct ndctl_test *ndctl_test_new(unsigned int kver, const char *testname);
 int ndctl_test_result(struct ndctl_test *test, int rc);
 int ndctl_test_get_skipped(struct ndctl_test *test);
 int ndctl_test_get_attempted(struct ndctl_test *test);
@@ -23,7 +23,7 @@ struct kmod_module;
 int ndctl_test_init(struct kmod_ctx **ctx, struct kmod_module **mod,
 		struct ndctl_ctx *nd_ctx, int log_level,
 		struct ndctl_test *test);
-int ndctl_test_module_remove(struct kmod_ctx **ctx, struct kmod_module **mod,
+void ndctl_test_module_remove(struct kmod_ctx **ctx, struct kmod_module **mod,
 			struct ndctl_ctx *nd_ctx);
 
 struct ndctl_ctx;

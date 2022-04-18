@@ -7,6 +7,8 @@
 #include <errno.h>
 #include <stdio.h>
 #include <test.h>
+#include <unistd.h>
+#include <json-c/json.h>
 
 #include <util/log.h>
 #include <util/sysfs.h>
@@ -39,9 +41,67 @@ static unsigned int get_system_kver(void)
 	return KERNEL_VERSION(a,b,c);
 }
 
-struct ndctl_test *ndctl_test_new(unsigned int kver)
+static bool skip_current_test(char *skip_file, const char *curtest)
+{
+	FILE *fp;
+	char buffer[16384]; //16k large enough for file with comments
+	const char *curtestname = basename(curtest);
+	struct json_object *skip_array;
+	struct json_object *test;
+	const char *testname;
+	size_t i, size;
+
+	fp = fopen(skip_file, "r");
+	if (fp == NULL) {
+		fprintf(stderr, "Failed to open the %s file. Ignore, and continue..\n", skip_file);
+		return false;
+	}
+
+	size = fread(buffer, 1, 16384, fp);
+	if (size == 0) {
+		fprintf(stderr, "Failed to read the %s file. Ignore, and continue..\n", skip_file);
+		return false;
+	}
+	fclose(fp);
+
+	skip_array = json_tokener_parse(buffer);
+	if (json_object_get_type(skip_array) != json_type_array) {
+		fprintf(stderr, "Failed to parse the %s file. Ignore, and continue..\n", skip_file);
+		return false;
+	}
+
+	for (i = 0; i < json_object_array_length(skip_array); i++) {
+		test = json_object_array_get_idx(skip_array, i);
+		testname = json_object_get_string(test);
+		if (testname && strcmp(curtestname, testname) == 0)
+			return true;
+	}
+
+	return false;
+}
+
+struct ndctl_test *ndctl_test_new(unsigned int kver, const char *testpath)
 {
 	struct ndctl_test *test = calloc(1, sizeof(*test));
+	const char *data_path  = getenv("DATA_PATH");
+	const char *test_family = getenv("NDCTL_TEST_FAMILY");
+	char *skip_file = NULL;
+
+	if (test_family && data_path &&
+	    (asprintf(&skip_file, "%s/skip_%s.js", data_path, test_family) < 0)) {
+		fprintf(stderr, "test : allocation failed\n");
+		free(test);
+		return NULL;
+	}
+
+	if (skip_file &&
+		(access(skip_file, F_OK) == 0) &&
+		skip_current_test(skip_file, testpath)) {
+		fprintf(stderr, "test : skip requested in the skip_%s.js\n",
+			test_family);
+		ndctl_test_skip(test);
+		exit(ndctl_test_result(test, 77));
+	}
 
 	if (!test)
 		return NULL;
