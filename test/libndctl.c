@@ -2075,6 +2075,46 @@ struct smart {
 		     life_used, shutdown_state, shutdown_count, vendor_size;
 };
 
+static int check_smart_ndtest(struct ndctl_bus *bus, struct ndctl_dimm *dimm,
+			struct check_cmd *check)
+{
+	static const struct smart smart_data = {
+		.flags = ND_SMART_HEALTH_VALID | ND_SMART_SHUTDOWN_VALID
+			| ND_SMART_SHUTDOWN_COUNT_VALID | ND_SMART_USED_VALID,
+		.health = ND_SMART_NON_CRITICAL_HEALTH,
+		.life_used = 5,
+		.shutdown_state = 0,
+		.shutdown_count = 42,
+		.vendor_size = 0,
+	};
+	struct ndctl_cmd *cmd = ndctl_dimm_cmd_new_smart(dimm);
+	int rc;
+
+	if (!cmd) {
+		fprintf(stderr, "%s: dimm: %#x failed to create cmd\n",
+				__func__, ndctl_dimm_get_handle(dimm));
+		return -ENXIO;
+	}
+
+	rc = ndctl_cmd_submit(cmd);
+	if (rc < 0) {
+		fprintf(stderr, "%s: dimm: %#x failed to submit cmd: %d\n",
+			__func__, ndctl_dimm_get_handle(dimm), rc);
+		ndctl_cmd_unref(cmd);
+		return rc;
+	}
+
+	__check_smart(dimm, cmd, flags, -1);
+	__check_smart(dimm, cmd, health, -1);
+	__check_smart(dimm, cmd, life_used, -1);
+	__check_smart(dimm, cmd, shutdown_state, -1);
+	__check_smart(dimm, cmd, shutdown_count, -1);
+	__check_smart(dimm, cmd, vendor_size, -1);
+
+	check->cmd = cmd;
+	return 0;
+}
+
 static int check_smart(struct ndctl_bus *bus, struct ndctl_dimm *dimm,
 		struct check_cmd *check)
 {
@@ -2298,6 +2338,11 @@ static int check_commands(struct ndctl_bus *bus, struct ndctl_dimm *dimm,
 	};
 
 	unsigned int i, rc = 0;
+
+	if (ndctl_test_family == NVDIMM_FAMILY_PAPR) {
+		dimm_commands &= ~(1 << ND_CMD_SMART_THRESHOLD);
+		__check_dimm_cmds[ND_CMD_SMART].check_fn = &check_smart_ndtest;
+	}
 
 	/*
 	 * The kernel did not start emulating v1.2 namespace spec smart data
