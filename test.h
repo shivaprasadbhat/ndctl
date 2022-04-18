@@ -23,6 +23,8 @@ struct kmod_module;
 int ndctl_test_init(struct kmod_ctx **ctx, struct kmod_module **mod,
 		struct ndctl_ctx *nd_ctx, int log_level,
 		struct ndctl_test *test);
+int ndctl_test_module_remove(struct kmod_ctx **ctx, struct kmod_module **mod,
+			struct ndctl_ctx *nd_ctx);
 
 struct ndctl_ctx;
 int test_parent_uuid(int loglevel, struct ndctl_test *test, struct ndctl_ctx *ctx);

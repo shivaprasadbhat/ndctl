@@ -2612,8 +2612,7 @@ int test_libndctl(int loglevel, struct ndctl_test *test, struct ndctl_ctx *ctx)
 
 	if (i >= ARRAY_SIZE(do_test))
 		result = EXIT_SUCCESS;
-	kmod_module_remove_module(mod, 0);
-	kmod_unref(kmod_ctx);
+	ndctl_test_module_remove(&kmod_ctx, &mod, ctx);
 	return result;
 }
 

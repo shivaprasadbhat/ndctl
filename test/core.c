@@ -107,6 +107,34 @@ int ndctl_test_get_skipped(struct ndctl_test *test)
 	return test->skip;
 }
 
+void ndctl_test_module_remove(struct kmod_ctx **ctx, struct kmod_module **mod,
+				struct ndctl_ctx *nd_ctx)
+{
+	struct ndctl_bus *bus;
+	int rc;
+
+	ndctl_bus_foreach(nd_ctx, bus) {
+		struct ndctl_region *region;
+
+		if ((strcmp(ndctl_bus_get_provider(bus),
+			   "nfit_test.0") != 0) &&
+			strcmp(ndctl_bus_get_provider(bus),
+				"nfit_test.1") != 0)
+			continue;
+
+		ndctl_region_foreach(bus, region)
+			ndctl_region_disable_invalidate(region);
+	}
+
+	rc = kmod_module_remove_module(*mod, 0);
+	if (rc < 0 && rc != -ENOENT) {
+		fprintf(stderr, "couldn't remove module %s\n",
+				    strerror(-rc));
+	}
+
+	kmod_unref(*ctx);
+}
+
 int ndctl_test_init(struct kmod_ctx **ctx, struct kmod_module **mod,
 		struct ndctl_ctx *nd_ctx, int log_level,
 		struct ndctl_test *test)

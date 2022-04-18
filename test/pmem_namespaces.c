@@ -198,7 +198,7 @@ int test_pmem_namespaces(int log_level, struct ndctl_test *test,
 			rc = 77;
 			ndctl_test_skip(test);
 			fprintf(stderr, "nfit_test unavailable skipping tests\n");
-			goto err_module;
+			goto exit;
 		}
 	}
 
@@ -214,7 +214,7 @@ int test_pmem_namespaces(int log_level, struct ndctl_test *test,
 		if (rc < 0) {
 			fprintf(stderr, "failed to zero %s\n",
 					ndctl_dimm_get_devname(dimm));
-			goto err;
+			goto exit;
 		}
 	}
 
@@ -228,14 +228,14 @@ int test_pmem_namespaces(int log_level, struct ndctl_test *test,
 	if (!pmem_region || ndctl_region_enable(pmem_region) < 0) {
 		fprintf(stderr, "%s: failed to find PMEM region\n", comm);
 		rc = -ENODEV;
-		goto err;
+		goto exit;
 	}
 
 	rc = -ENODEV;
 	ndns = create_pmem_namespace(pmem_region);
 	if (!ndns) {
 		fprintf(stderr, "%s: failed to create PMEM namespace\n", comm);
-		goto err;
+		goto exit;
 	}
 
 	sprintf(bdev, "/dev/%s", ndctl_namespace_get_block_device(ndns));
@@ -243,20 +243,9 @@ int test_pmem_namespaces(int log_level, struct ndctl_test *test,
 
 	disable_pmem_namespace(ndns);
 
- err:
-	/* unload nfit_test */
-	bus = ndctl_bus_get_by_provider(ctx, "nfit_test.0");
-	if (bus)
-		ndctl_region_foreach(bus, region)
-			ndctl_region_disable_invalidate(region);
-	bus = ndctl_bus_get_by_provider(ctx, "nfit_test.1");
-	if (bus)
-		ndctl_region_foreach(bus, region)
-			ndctl_region_disable_invalidate(region);
-	kmod_module_remove_module(mod, 0);
+ exit:
+	ndctl_test_module_remove(&kmod_ctx, &mod, ctx);
 
- err_module:
-	kmod_unref(kmod_ctx);
 	return rc;
 }
 

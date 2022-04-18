@@ -109,9 +109,9 @@ static int test_ack_shutdown_count_set(int loglevel, struct ndctl_test *test,
 	}
 
 	result = do_test(ctx, test);
-	kmod_module_remove_module(mod, 0);
 
-	kmod_unref(kmod_ctx);
+	ndctl_test_module_remove(&kmod_ctx, &mod, ctx);
+
 	return result;
 }
 
