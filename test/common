@@ -31,6 +31,10 @@ if [ -z $TEST_PATH ]; then
 	export TEST_PATH=.
 fi
 
+if [ ! -v NDCTL_TEST_FAMILY ]; then
+	export NDCTL_TEST_FAMILY=INTEL
+fi
+
 # NFIT_TEST_BUS[01]
 #
 NFIT_TEST_BUS0="nfit_test.0"
@@ -111,6 +115,9 @@ _cleanup()
 	$NDCTL disable-region -b $NFIT_TEST_BUS0 all
 	$NDCTL disable-region -b $NFIT_TEST_BUS1 all
 	modprobe -r nfit_test
+	if [ $NDCTL_TEST_FAMILY == "INTEL" ]; then
+		modprobe -r nfit
+	fi
 }
 
 _init()

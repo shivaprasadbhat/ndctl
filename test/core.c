@@ -130,8 +130,22 @@ void ndctl_test_module_remove(struct kmod_ctx **ctx, struct kmod_module **mod,
 	if (rc < 0 && rc != -ENOENT) {
 		fprintf(stderr, "couldn't remove module %s\n",
 				    strerror(-rc));
+		kmod_unref(*ctx);
+		return;
 	}
 
+	rc = kmod_module_new_from_name(*ctx, "nfit", mod);
+	if (rc == 0) {
+		int state = kmod_module_get_initstate(*mod);
+
+		if (state > 0) {
+			rc = kmod_module_remove_module(*mod, 0);
+			if (rc < 0) {
+				fprintf(stderr, "couldn't remove module %s\n",
+				    strerror(-rc));
+			}
+		}
+	}
 	kmod_unref(*ctx);
 }
 
