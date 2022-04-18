@@ -24,6 +24,21 @@ struct ndctl_test {
 	int skip;
 };
 
+char TEST_PROVIDER0[15] = "nfit_test.0";
+char TEST_PROVIDER1[15] = "nfit_test.1";
+int ndctl_test_family = NVDIMM_FAMILY_INTEL;
+
+void init_env(void)
+{
+	char *test_env = getenv("NDCTL_TEST_FAMILY");
+
+	if (test_env && strcmp(test_env, "PAPR") == 0) {
+		ndctl_test_family = NVDIMM_FAMILY_PAPR;
+		strcpy(TEST_PROVIDER0, "ndtest.0");
+		strcpy(TEST_PROVIDER1, "ndtest.1");
+	}
+}
+
 static unsigned int get_system_kver(void)
 {
 	const char *kver = getenv("KVER");
@@ -177,9 +192,9 @@ void ndctl_test_module_remove(struct kmod_ctx **ctx, struct kmod_module **mod,
 		struct ndctl_region *region;
 
 		if ((strcmp(ndctl_bus_get_provider(bus),
-			   "nfit_test.0") != 0) &&
+			   TEST_PROVIDER0) != 0) &&
 			strcmp(ndctl_bus_get_provider(bus),
-				"nfit_test.1") != 0)
+				TEST_PROVIDER1) != 0)
 			continue;
 
 		ndctl_region_foreach(bus, region)
@@ -360,7 +375,7 @@ retry:
 			struct ndctl_region *region;
 
 			if (strcmp(ndctl_bus_get_provider(bus),
-				   "nfit_test.0") != 0)
+				   TEST_PROVIDER0) != 0)
 				continue;
 			ndctl_region_foreach(bus, region)
 				ndctl_region_disable_invalidate(region);
@@ -386,7 +401,7 @@ retry:
 		struct ndctl_region *region;
 		struct ndctl_dimm *dimm;
 
-		if (strcmp(ndctl_bus_get_provider(bus), "nfit_test.0") != 0)
+		if (strcmp(ndctl_bus_get_provider(bus), TEST_PROVIDER0) != 0)
 			continue;
 
 		ndctl_region_foreach (bus, region)

@@ -56,7 +56,7 @@ static void reset_bus(struct ndctl_bus *bus)
 
 static int do_test(struct ndctl_ctx *ctx, struct ndctl_test *test)
 {
-	struct ndctl_bus *bus = ndctl_bus_get_by_provider(ctx, "nfit_test.0");
+	struct ndctl_bus *bus = ndctl_bus_get_by_provider(ctx, TEST_PROVIDER0);
 	struct ndctl_dimm *dimm;
 	struct ndctl_region *region;
 	struct log_ctx log_ctx;
@@ -117,17 +117,12 @@ static int test_ack_shutdown_count_set(int loglevel, struct ndctl_test *test,
 
 int main(int argc, char *argv[])
 {
-	char *test_env = getenv("NDCTL_TEST_FAMILY");
 	struct ndctl_test *test = ndctl_test_new(0, argv[0]);
 	struct ndctl_ctx *ctx;
 	int rc;
 
-	if (!test) {
-		fprintf(stderr, "failed to initialize test\n");
-		return EXIT_FAILURE;
-	}
-
-	if (test_env && strcmp(test_env, "PAPR") == 0)
+	init_env();
+	if (ndctl_test_family == NVDIMM_FAMILY_PAPR)
 		return ndctl_test_result(test, 77);
 
 	rc = ndctl_new(&ctx);

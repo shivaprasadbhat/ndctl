@@ -193,7 +193,7 @@ int test_pmem_namespaces(int log_level, struct ndctl_test *test,
 		fprintf(stderr, "ACPI.NFIT unavailable falling back to nfit_test\n");
 		rc = ndctl_test_init(&kmod_ctx, &mod, NULL, log_level, test);
 		ndctl_invalidate(ctx);
-		bus = ndctl_bus_get_by_provider(ctx, "nfit_test.0");
+		bus = ndctl_bus_get_by_provider(ctx, TEST_PROVIDER0);
 		if (rc < 0 || !bus) {
 			rc = 77;
 			ndctl_test_skip(test);
@@ -254,6 +254,8 @@ int __attribute__((weak)) main(int argc, char *argv[])
 	struct ndctl_test *test = ndctl_test_new(0, argv[0]);
 	struct ndctl_ctx *ctx;
 	int rc;
+
+	init_env();
 
 	comm = argv[0];
 	if (!test) {

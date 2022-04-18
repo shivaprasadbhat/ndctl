@@ -66,7 +66,7 @@ test -x $TEST_PATH/daxdev-errors
 $TEST_PATH/daxdev-errors $busdev $region
 
 # check badblocks, should be empty
-if read sector len < /sys/bus/platform/devices/nfit_test.0/$busdev/$region/badblocks; then
+if read sector len < /sys/bus/platform/devices/$NFIT_TEST_BUS0/$busdev/$region/badblocks; then
 	echo "badblocks empty, expected"
 fi
 [ -n "$sector" ] && echo "fail: $LINENO" && exit 1

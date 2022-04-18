@@ -73,8 +73,6 @@
  *    dimm.
  */
 
-static const char *NFIT_PROVIDER0 = "nfit_test.0";
-static const char *NFIT_PROVIDER1 = "nfit_test.1";
 #define SZ_4K   0x00001000
 #define SZ_128K 0x00020000
 #define SZ_7M   0x00700000
@@ -2496,7 +2494,7 @@ static void reset_bus(struct ndctl_bus *bus, enum dimm_reset reset)
 
 static int do_test0(struct ndctl_ctx *ctx, struct ndctl_test *test)
 {
-	struct ndctl_bus *bus = ndctl_bus_get_by_provider(ctx, NFIT_PROVIDER0);
+	struct ndctl_bus *bus = ndctl_bus_get_by_provider(ctx, TEST_PROVIDER0);
 	struct ndctl_region *region;
 	int rc;
 
@@ -2550,7 +2548,7 @@ static int do_test0(struct ndctl_ctx *ctx, struct ndctl_test *test)
 
 static int do_test1(struct ndctl_ctx *ctx, struct ndctl_test *test)
 {
-	struct ndctl_bus *bus = ndctl_bus_get_by_provider(ctx, NFIT_PROVIDER1);
+	struct ndctl_bus *bus = ndctl_bus_get_by_provider(ctx, TEST_PROVIDER1);
 	int rc;
 
 	if (!bus)
@@ -2621,6 +2619,8 @@ int __attribute__((weak)) main(int argc, char *argv[])
 	struct ndctl_test *test = ndctl_test_new(0, argv[0]);
 	struct ndctl_ctx *ctx;
 	int rc;
+
+	init_env();
 
 	if (!test) {
 		fprintf(stderr, "failed to initialize test\n");

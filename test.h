@@ -6,6 +6,12 @@
 
 struct ndctl_test;
 struct ndctl_ctx;
+
+extern char TEST_PROVIDER0[15];
+extern char TEST_PROVIDER1[15];
+extern int ndctl_test_family;
+void init_env(void);
+
 struct ndctl_test *ndctl_test_new(unsigned int kver, const char *testname);
 int ndctl_test_result(struct ndctl_test *test, int rc);
 int ndctl_test_get_skipped(struct ndctl_test *test);

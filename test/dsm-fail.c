@@ -18,8 +18,6 @@
 #include <ndctl/ndctl.h>
 #include <test.h>
 
-#define DIMM_PATH "/sys/devices/platform/nfit_test.0/nfit_test_dimm/test_dimm0"
-
 static int reset_bus(struct ndctl_bus *bus)
 {
 	struct ndctl_region *region;
@@ -176,10 +174,11 @@ static int test_regions_enable(struct ndctl_bus *bus,
 
 static int do_test(struct ndctl_ctx *ctx, struct ndctl_test *test)
 {
-	struct ndctl_bus *bus = ndctl_bus_get_by_provider(ctx, "nfit_test.0");
+	struct ndctl_bus *bus = ndctl_bus_get_by_provider(ctx, TEST_PROVIDER0);
 	struct ndctl_region *region, *victim_region = NULL;
 	struct ndctl_dimm *dimm, *victim = NULL;
 	char path[1024], buf[SYSFS_ATTR_SIZE];
+	char *dimm_path;
 	struct log_ctx log_ctx;
 	unsigned int handle;
 	int rc, err = 0;
@@ -197,7 +196,14 @@ static int do_test(struct ndctl_ctx *ctx, struct ndctl_test *test)
 		return -ENXIO;
 	}
 
-	sprintf(path, "%s/handle", DIMM_PATH);
+	if (asprintf(&dimm_path,
+			"/sys/devices/platform/%s/nfit_test_dimm/test_dimm0",
+			TEST_PROVIDER0) < 0) {
+		fprintf(stderr, "Path allocation failed\n");
+		return -ENOMEM;
+	}
+
+	sprintf(path, "%s/handle", dimm_path);
 	rc = __sysfs_read_attr(&log_ctx, path, buf);
 	if (rc) {
 		fprintf(stderr, "failed to retrieve test dimm handle\n");
@@ -280,7 +286,7 @@ static int do_test(struct ndctl_ctx *ctx, struct ndctl_test *test)
 		goto out;
 
 
-	rc = set_dimm_response(DIMM_PATH, ND_CMD_GET_CONFIG_SIZE, -EACCES,
+	rc = set_dimm_response(dimm_path, ND_CMD_GET_CONFIG_SIZE, -EACCES,
 			&log_ctx);
 	if (rc)
 		goto out;
@@ -290,7 +296,7 @@ static int do_test(struct ndctl_ctx *ctx, struct ndctl_test *test)
 	rc = test_regions_enable(bus, victim, victim_region, true, 2);
 	if (rc)
 		goto out;
-	rc = set_dimm_response(DIMM_PATH, ND_CMD_GET_CONFIG_SIZE, 0, &log_ctx);
+	rc = set_dimm_response(dimm_path, ND_CMD_GET_CONFIG_SIZE, 0, &log_ctx);
 	if (rc)
 		goto out;
 
@@ -300,7 +306,7 @@ static int do_test(struct ndctl_ctx *ctx, struct ndctl_test *test)
 	if (rc)
 		goto out;
 
-	rc = set_dimm_response(DIMM_PATH, ND_CMD_GET_CONFIG_DATA, -EACCES,
+	rc = set_dimm_response(dimm_path, ND_CMD_GET_CONFIG_DATA, -EACCES,
 			&log_ctx);
 	if (rc)
 		goto out;
@@ -311,7 +317,7 @@ static int do_test(struct ndctl_ctx *ctx, struct ndctl_test *test)
 	rc = test_regions_enable(bus, victim, victim_region, false, 0);
 	if (rc)
 		goto out;
-	rc = set_dimm_response(DIMM_PATH, ND_CMD_GET_CONFIG_DATA, 0, &log_ctx);
+	rc = set_dimm_response(dimm_path, ND_CMD_GET_CONFIG_DATA, 0, &log_ctx);
 	if (rc)
 		goto out;
 	rc = dimms_disable(bus);
@@ -320,7 +326,7 @@ static int do_test(struct ndctl_ctx *ctx, struct ndctl_test *test)
 
  out:
 	err = rc;
-	sprintf(path, "%s/fail_cmd", DIMM_PATH);
+	sprintf(path, "%s/fail_cmd", dimm_path);
 	sprintf(buf, "0\n");
 	rc = __sysfs_write_attr(&log_ctx, path, buf);
 	if (rc)
@@ -333,6 +339,7 @@ static int do_test(struct ndctl_ctx *ctx, struct ndctl_test *test)
 		rc = -ENXIO;
 	}
 	reset_bus(bus);
+	free(dimm_path);
 
 	if (rc)
 		err = rc;
@@ -367,6 +374,8 @@ int __attribute__((weak)) main(int argc, char *argv[])
 	struct ndctl_test *test = ndctl_test_new(0, argv[0]);
 	struct ndctl_ctx *ctx;
 	int rc;
+
+	init_env();
 
 	if (!test) {
 		fprintf(stderr, "failed to initialize test\n");
