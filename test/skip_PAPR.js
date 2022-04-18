@@ -24,8 +24,7 @@
  "revoke_devmem",	//		""
  "align.sh",		//		""
  "dm.sh",		//		""
- "mmap.sh",		//		""
- "monitor.sh"		// To be fixed
+ "mmap.sh"		//		""
 ]
 
 // NOTE: The libjson-c doesn't like comments in json files, so keep the file

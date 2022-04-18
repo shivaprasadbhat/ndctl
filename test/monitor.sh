@@ -136,6 +136,10 @@ test_filter_dimmevent()
 	check_result "$monitor_dimms"
 	stop_monitor
 
+	if [ $NDCTL_TEST_FAMILY == "PAPR" ]; then
+		return
+	fi
+
 	inject_value=$($NDCTL list -H -d $monitor_dimms | jq -r .[]."health"."spares_threshold")
 	inject_value=$((inject_value - 1))
 	start_monitor "-d $monitor_dimms -D dimm-spares-remaining"
@@ -153,12 +157,17 @@ test_filter_dimmevent()
 
 do_tests()
 {
+	test_filter_dimmevent
+
+	if [ $NDCTL_TEST_FAMILY == "PAPR" ]; then
+		return
+	fi
+
 	test_filter_dimm
 	test_filter_bus
 	test_filter_region
 	test_filter_namespace
 	test_conf_file
-	test_filter_dimmevent
 }
 
 _init
