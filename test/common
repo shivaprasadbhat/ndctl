@@ -124,7 +124,7 @@ _cleanup()
 {
 	$NDCTL disable-region -b $NFIT_TEST_BUS0 all
 	$NDCTL disable-region -b $NFIT_TEST_BUS1 all
-	modprobe -r nfit_test
+	modprobe -r $TEST_MODULE
 	if [ $NDCTL_TEST_FAMILY == "INTEL" ]; then
 		modprobe -r nfit
 	fi
@@ -132,14 +132,40 @@ _cleanup()
 
 _init()
 {
-	set +e
-	modprobe nfit_test
-	if [ $? -ne 0 ]; then
-		echo "Could not load the nfit_test module."
-		exit 77
+	modules=$(awk -F" " 'BEGIN {ORS=" "} {print $1}' /proc/modules)
+	if [ "$NDCTL_TEST_FAMILY" == "PAPR" ]; then
+		TEST_MODULE="ndtest"
+		if [[ " ${modules[*]} "  =~ " nfit " ]] ||
+			[[ " ${modules[*]} " =~ " nfit_test " ]]; then
+			echo "The test module ${TEST_MODULE}.ko conflicts "
+			echo "with nfit and nfit_test. Unload them and retry.."
+			exit 77
+		fi
+		NFIT_TEST_BUS0=ndtest.0
+		NFIT_TEST_BUS1=ndtest.1
+	else
+		TEST_MODULE="nfit_test"
+		if [[ " ${modules[*]} " =~ "ndtest" ]]; then
+			echo "The test module ${TEST_MODULE}.ko conflicts "
+			echo "with ndtest. Unload it and retry.."
+			exit 77
+		fi
 	fi
-	set -e
-	trap _cleanup EXIT INT TERM HUP PIPE
+	if [ -d "/lib/modules/`uname -r`/extra/test" ]; then
+		if [ -f "/lib/modules/`uname -r`/extra/test/${TEST_MODULE}.ko" ]; then
+			set +e
+			modprobe ${TEST_MODULE}
+			if [ $? -ne 0 ]; then
+				echo "Could not load the ${TEST_MODULE} module."
+				exit 77
+			fi
+			set -e
+			trap _cleanup EXIT INT TERM HUP PIPE
+		else
+			echo "The test module ${TEST_MODULE}.ko not found. Skipping.."
+			exit 77
+		fi
+	fi
 }
 
 # json2var

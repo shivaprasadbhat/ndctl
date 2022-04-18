@@ -177,6 +177,11 @@ tests = [
   [ 'track-uuid.sh',          track_uuid,	  'ndctl' ],
 ]
 
+families_string = get_option('test-families')
+if families_string != ''
+  families=families_string.split(',')
+endif
+
 if get_option('destructive').enabled()
   sub_section = find_program('sub-section.sh')
   dax_ext4 = find_program('dax-ext4.sh')
@@ -212,28 +217,31 @@ if get_option('keyutils').enabled()
   ]
 endif
 
-foreach t : tests
-  test(t[0], t[1],
-    is_parallel : false,
-    depends : [
-      ndctl_tool,
-      daxctl_tool,
-      cxl_tool,
-      smart_notify,
-      list_smart_dimm,
-      dax_pmd,
-      dax_errors,
-      daxdev_errors,
-      dax_dev,
-      mmap,
-    ],
-    suite: t[2],
-    timeout : 0,
-    env : [
-      'NDCTL=@0@'.format(ndctl_tool.full_path()),
-      'DAXCTL=@0@'.format(daxctl_tool.full_path()),
-      'TEST_PATH=@0@'.format(meson.current_build_dir()),
-      'DATA_PATH=@0@'.format(meson.current_source_dir()),
-    ],
-  )
+foreach f : families
+  foreach t : tests
+    test(t[0], t[1],
+      is_parallel : false,
+      depends : [
+        ndctl_tool,
+        daxctl_tool,
+        cxl_tool,
+        smart_notify,
+        list_smart_dimm,
+        dax_pmd,
+        dax_errors,
+        daxdev_errors,
+        dax_dev,
+        mmap,
+      ],
+      suite: [ t[2], f ],
+      timeout : 0,
+      env : [
+        'NDCTL=@0@'.format(ndctl_tool.full_path()),
+        'DAXCTL=@0@'.format(daxctl_tool.full_path()),
+        'TEST_PATH=@0@'.format(meson.current_build_dir()),
+        'DATA_PATH=@0@'.format(meson.current_source_dir()),
+        'NDCTL_TEST_FAMILY=@0@'.format(f.to_upper().strip()),
+      ],
+    )
+  endforeach
 endforeach

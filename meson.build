@@ -14,6 +14,16 @@ project('ndctl', 'c',
   ],
 )
 
+families = [ 'INTEL', 'PAPR' ]
+if get_option('test-families') != ''
+  families_str=get_option('test-families').split(',')
+  foreach f : families_str
+    if not families.contains(f.to_upper().strip())
+      error('Invalid test_family "@0@" specified.'.format(f))
+    endif
+  endforeach
+endif
+
 # rootprefixdir and rootlibdir setup copied from systemd:
 rootprefixdir = get_option('rootprefix')
 rootprefix_default = '/usr'

@@ -7,6 +7,8 @@ option('keyutils', type : 'feature', value : 'enabled',
   description : 'enable nvdimm device passphrase management')
 option('test', type : 'feature', value : 'disabled',
   description : 'enable shipping tests in ndctl')
+option('test-families', type : 'string', value : 'INTEL,PAPR',
+  description : 'specify command separated test families in ndctl. Default is INTEL,PAPR')
 option('destructive', type : 'feature', value : 'disabled',
   description : 'enable tests that may clobber live system resources')
 option('poison', type : 'feature', value : 'enabled',

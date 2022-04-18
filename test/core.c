@@ -260,6 +260,18 @@ int ndctl_test_init(struct kmod_ctx **ctx, struct kmod_module **mod,
 	if (test_env && strcmp(test_env, "PAPR") == 0)
 		family = NVDIMM_FAMILY_PAPR;
 
+	if ((family == NVDIMM_FAMILY_INTEL) &&
+		(access("/sys/module/ndtest/initstate", F_OK) == 0)) {
+		fprintf(stderr,
+			"PAPR specific ndtest module loaded while attempting to test nfit_test\n");
+		return -ENOTSUP;
+	} else if ((family == NVDIMM_FAMILY_PAPR) &&
+		   ((access("/sys/module/nfit_test/initstate", F_OK) == 0) ||
+		    (access("/sys/module/nfit/initstate", F_OK) == 0))) {
+		fprintf(stderr, "nfit/nfit_test module loaded while attempting to test ndtest\n");
+		return -ENOTSUP;
+	}
+
 	if (family == -1) {
 		log_err(&log_ctx, "Cannot determine NVDIMM family\n");
 		return -ENOTSUP;
@@ -363,7 +375,10 @@ retry:
 		return -ENXIO;
 	}
 
-	rc = kmod_module_new_from_name(*ctx, "nfit_test", mod);
+	if (family == NVDIMM_FAMILY_INTEL)
+		rc = kmod_module_new_from_name(*ctx, "nfit_test", mod);
+	else
+		rc = kmod_module_new_from_name(*ctx, "ndtest", mod);
 	if (rc < 0) {
 		kmod_unref(*ctx);
 		return rc;

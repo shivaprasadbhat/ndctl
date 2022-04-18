@@ -2596,7 +2596,7 @@ int test_libndctl(int loglevel, struct ndctl_test *test, struct ndctl_ctx *ctx)
 	err = ndctl_test_init(&kmod_ctx, &mod, ctx, loglevel, test);
 	if (err < 0) {
 		ndctl_test_skip(test);
-		fprintf(stderr, "nfit_test unavailable skipping tests\n");
+		fprintf(stderr, "test module couldnt not be loaded, skipping tests\n");
 		return 77;
 	}
 
