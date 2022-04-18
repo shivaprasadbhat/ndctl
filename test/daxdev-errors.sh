@@ -14,7 +14,7 @@ check_prereq "jq"
 trap 'err $LINENO' ERR
 
 # setup (reset nfit_test dimms)
-modprobe nfit_test
+_init
 reset
 
 rc=1
@@ -70,7 +70,5 @@ if read sector len < /sys/bus/platform/devices/nfit_test.0/$busdev/$region/badbl
 	echo "badblocks empty, expected"
 fi
 [ -n "$sector" ] && echo "fail: $LINENO" && exit 1
-
-_cleanup
 
 exit 0

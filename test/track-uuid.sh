@@ -11,7 +11,7 @@ set -e
 trap 'err $LINENO' ERR
 
 # setup (reset nfit_test dimms)
-modprobe nfit_test
+_init
 reset
 
 rc=1
@@ -34,5 +34,4 @@ $NDCTL disable-namespace $dev
 uuidgen > /sys/bus/nd/devices/$dev/uuid
 $NDCTL enable-namespace $dev
 
-_cleanup
 exit 0

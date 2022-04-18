@@ -161,10 +161,9 @@ do_tests()
 	test_filter_dimmevent
 }
 
-modprobe nfit_test
+_init
 rc=1
 reset
 set_smart_supported_bus
 do_tests
-_cleanup
 exit 0

@@ -167,7 +167,7 @@ do_tests()
 
 check_min_kver "4.19" || do_skip "kernel $KVER may not support smart (un)injection"
 check_prereq "jq"
-modprobe nfit_test
+_init
 rc=1
 
 jlist=$($TEST_PATH/list-smart-dimm -b $bus)
@@ -175,5 +175,4 @@ dimm="$(jq '.[]."dev"?, ."dev"?' <<< $jlist | sort | head -1 | xargs)"
 test -n "$dimm"
 
 do_tests
-_cleanup
 exit 0

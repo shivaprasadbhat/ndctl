@@ -246,7 +246,7 @@ if [ "$uid" -ne 0 ]; then
 	do_skip "run as root or with a sudo login shell for test to work"
 fi
 
-modprobe nfit_test
+_init
 setup
 check_prereq "keyctl"
 rc=1
@@ -275,5 +275,4 @@ test_6_load_keys
 
 test_cleanup
 post_cleanup
-_cleanup
 exit 0

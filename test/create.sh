@@ -14,7 +14,7 @@ check_min_kver "4.5" || do_skip "may lack namespace mode attribute"
 trap 'err $LINENO' ERR
 
 # setup (reset nfit_test dimms)
-modprobe nfit_test
+_init
 reset
 
 rc=1
@@ -39,7 +39,5 @@ eval $(echo $json | json2var)
 
 # free capacity for blk creation
 $NDCTL destroy-namespace -f $dev
-
-_cleanup
 
 exit 0

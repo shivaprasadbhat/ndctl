@@ -14,7 +14,7 @@ trap 'err $LINENO' ERR
 ALIGN_SIZE=`getconf PAGESIZE`
 
 # setup (reset nfit_test dimms)
-modprobe nfit_test
+_init
 reset
 reset1
 
@@ -26,7 +26,5 @@ echo $ALIGN_SIZE > /sys/bus/nd/devices/$REGION/align
 NAMESPACE=$($NDCTL create-namespace --no-autolabel -r $REGION -m sector -f -l 4K | jq -r ".dev")
 $NDCTL create-namespace --no-autolabel -e $NAMESPACE -m dax -f -a $ALIGN_SIZE
 $NDCTL create-namespace --no-autolabel -e $NAMESPACE -m sector -f -l 4K
-
-_cleanup
 
 exit 0

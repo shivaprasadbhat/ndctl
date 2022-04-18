@@ -150,10 +150,9 @@ do_tests()
 }
 
 # setup (reset nfit_test dimms, create the BTT namespace)
-modprobe nfit_test
+_init
 rc=1
 reset && create
 do_tests
 reset
-_cleanup
 exit 0

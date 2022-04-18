@@ -28,7 +28,7 @@ set -e
 trap 'err $LINENO' ERR
 
 # setup (reset nfit_test dimms)
-modprobe nfit_test
+_init
 reset
 
 rc=1
@@ -67,5 +67,4 @@ if read -r sector len < "/sys/block/$raw_bdev/badblocks"; then
 	false
 fi
 
-_cleanup
 exit 0

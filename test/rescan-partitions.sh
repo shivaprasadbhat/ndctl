@@ -65,11 +65,10 @@ test_mode()
 	$NDCTL destroy-namespace $dev
 }
 
-modprobe nfit_test
+_init
 rc=1
 reset
 test_mode "raw"
 test_mode "fsdax"
 test_mode "sector"
-_cleanup
 exit 0

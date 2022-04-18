@@ -172,11 +172,10 @@ do_tests()
 	ns_info_wipe
 }
 
-modprobe nfit_test
+_init
 check_prereq xxd
 rc=1
 reset
 do_tests
 reset
-_cleanup
 exit 0

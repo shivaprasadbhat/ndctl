@@ -16,7 +16,7 @@ trap 'err $LINENO' ERR
 ALIGN_SIZE=`getconf PAGESIZE`
 
 # setup (reset nfit_test dimms)
-modprobe nfit_test
+_init
 reset
 rc=1
 
@@ -27,7 +27,5 @@ json=$($NDCTL create-namespace -b $NFIT_TEST_BUS0 -r $region -t pmem -m devdax -
 chardev1=$(echo $json | jq ". | select(.mode == \"devdax\") | .daxregion.devices[0].chardev")
 json=$($NDCTL create-namespace -b $NFIT_TEST_BUS0 -r $region -t pmem -m devdax -a $ALIGN_SIZE -s 16M)
 chardev2=$(echo $json | jq ". | select(.mode == \"devdax\") | .daxregion.devices[0].chardev")
-
-_cleanup
 
 exit 0

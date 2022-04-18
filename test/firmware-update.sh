@@ -70,11 +70,10 @@ do_tests()
 
 check_min_kver "4.16" || do_skip "may lack firmware update test handling"
 
-modprobe nfit_test
+_init
 fwupd_reset
 detect
 rc=1
 do_tests
 rm -f $image
-_cleanup
 exit 0

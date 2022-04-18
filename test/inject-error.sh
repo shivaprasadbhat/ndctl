@@ -79,10 +79,9 @@ do_tests()
 	check_status
 }
 
-modprobe nfit_test
+_init
 rc=1
 reset && create
 do_tests
 reset
-_cleanup
 exit 0

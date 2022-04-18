@@ -31,9 +31,8 @@ do_test()
 	$NDCTL create-namespace -r $region -t pmem
 }
 
-modprobe nfit_test
+_init
 rc=1
 reset
 do_test
-_cleanup
 exit 0

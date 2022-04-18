@@ -13,7 +13,7 @@ check_min_kver "4.6" || do_skip "lacks clear poison support"
 trap 'err $LINENO' ERR
 
 # setup (reset nfit_test dimms)
-modprobe nfit_test
+_init
 reset
 
 rc=1
@@ -71,7 +71,5 @@ if check_min_kver "4.9"; then
 		echo "fail: $LINENO" && exit 1
 	fi
 fi
-
-_cleanup
 
 exit 0

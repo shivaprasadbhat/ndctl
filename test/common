@@ -113,6 +113,18 @@ _cleanup()
 	modprobe -r nfit_test
 }
 
+_init()
+{
+	set +e
+	modprobe nfit_test
+	if [ $? -ne 0 ]; then
+		echo "Could not load the nfit_test module."
+		exit 77
+	fi
+	set -e
+	trap _cleanup EXIT INT TERM HUP PIPE
+}
+
 # json2var
 # stdin: json
 #

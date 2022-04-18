@@ -25,7 +25,7 @@ mkdir -p $MNT
 trap 'err $LINENO cleanup' ERR
 
 # setup (reset nfit_test dimms)
-modprobe nfit_test
+_init
 reset
 
 rc=1
@@ -110,6 +110,5 @@ echo $((start_sect + 1)) 1 > /sys/block/$blockdev/badblocks
 dd if=$MNT/$FILE of=/dev/null iflag=direct bs=4096 count=1 && err $LINENO || true
 
 cleanup
-_cleanup
 
 exit 0

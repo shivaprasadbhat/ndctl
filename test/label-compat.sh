@@ -15,7 +15,7 @@ check_prereq "jq"
 trap 'err $LINENO' ERR
 
 # setup (reset nfit_test dimms)
-modprobe nfit_test
+_init
 $NDCTL disable-region -b $NFIT_TEST_BUS0 all
 $NDCTL init-labels -f -b $NFIT_TEST_BUS0 all
 
@@ -42,7 +42,5 @@ if [ -z $len ]; then
 	echo "failed to find legacy isetcookie namespace"
 	exit 1
 fi
-
-_cleanup
 
 exit 0
