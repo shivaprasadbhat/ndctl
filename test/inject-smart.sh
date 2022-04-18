@@ -4,7 +4,6 @@
 
 rc=77
 . $(dirname $0)/common
-bus="$NFIT_TEST_BUS0"
 inj_val="42"
 
 trap 'err $LINENO' ERR
@@ -152,12 +151,16 @@ do_tests()
 	$NDCTL inject-smart -b $bus --uninject-all $dimm
 
 	# start tests
-	for field in "${fields_val[@]}"; do
-		test_field $field $inj_val
-	done
-
 	for field in "${fields_bool[@]}"; do
 		test_field $field
+	done
+
+	if [ $NDCTL_TEST_FAMILY == "PAPR" ]; then
+		return
+	fi
+
+	for field in "${fields_val[@]}"; do
+		test_field $field $inj_val
 	done
 
 	for field in "${fields_thresh[@]}"; do
@@ -168,6 +171,7 @@ do_tests()
 check_min_kver "4.19" || do_skip "kernel $KVER may not support smart (un)injection"
 check_prereq "jq"
 _init
+bus="$NFIT_TEST_BUS0"
 rc=1
 
 jlist=$($TEST_PATH/list-smart-dimm -b $bus)

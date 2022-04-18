@@ -25,8 +25,7 @@
  "align.sh",		//		""
  "dm.sh",		//		""
  "mmap.sh",		//		""
- "monitor.sh",		// To be fixed
- "inject-smart.sh"	//    ""
+ "monitor.sh"		// To be fixed
 ]
 
 // NOTE: The libjson-c doesn't like comments in json files, so keep the file

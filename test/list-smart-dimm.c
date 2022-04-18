@@ -7,6 +7,7 @@
 #include <ndctl/libndctl.h>
 #include <util/parse-options.h>
 
+#include <test.h>
 #include <ndctl/filter.h>
 #include <ndctl/ndctl.h>
 #include <ndctl/json.h>
@@ -26,6 +27,32 @@ static bool filter_region(struct ndctl_region *region,
 		struct ndctl_filter_ctx *ctx)
 {
 	return true;
+}
+
+static void filter_ndtest_dimm(struct ndctl_dimm *dimm,
+			       struct ndctl_filter_ctx *ctx)
+{
+	struct list_filter_arg *lfa = ctx->list;
+	struct json_object *jdimm;
+
+	if (!ndctl_dimm_is_cmd_supported(dimm, ND_CMD_SMART))
+		return;
+
+	if (!lfa->jdimms) {
+		lfa->jdimms = json_object_new_array();
+		if (!lfa->jdimms) {
+			fail("\n");
+			return;
+		}
+	}
+
+	jdimm = util_dimm_to_json(dimm, lfa->flags);
+	if (!jdimm) {
+		fail("\n");
+		return;
+	}
+
+	json_object_array_add(lfa->jdimms, jdimm);
 }
 
 static void filter_dimm(struct ndctl_dimm *dimm, struct ndctl_filter_ctx *ctx)
@@ -92,6 +119,7 @@ int main(int argc, const char *argv[])
 	struct ndctl_filter_ctx fctx = { 0 };
 	struct list_filter_arg lfa = { 0 };
 
+	init_env();
 	rc = ndctl_new(&ctx);
 	if (rc < 0)
 		return EXIT_FAILURE;
@@ -102,7 +130,10 @@ int main(int argc, const char *argv[])
 		usage_with_options(u, options);
 
 	fctx.filter_bus = filter_bus;
-	fctx.filter_dimm = filter_dimm;
+	if (ndctl_test_family == NVDIMM_FAMILY_PAPR)
+		fctx.filter_dimm = filter_ndtest_dimm;
+	else
+		fctx.filter_dimm = filter_dimm;
 	fctx.filter_region = filter_region;
 	fctx.filter_namespace = NULL;
 	fctx.list = &lfa;

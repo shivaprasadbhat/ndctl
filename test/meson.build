@@ -76,7 +76,7 @@ daxdev_errors = executable('daxdev-errors', [
   include_directories : root_inc,
 )
 
-list_smart_dimm = executable('list-smart-dimm', [
+list_smart_dimm = executable('list-smart-dimm', testcore + [
     'list-smart-dimm.c',
     '../ndctl/filter.c',
     '../util/json.c',
